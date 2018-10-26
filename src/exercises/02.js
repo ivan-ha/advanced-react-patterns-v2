@@ -3,6 +3,18 @@
 import React from 'react'
 import {Switch} from '../switch'
 
+const isToggleProperty = child => {
+  for (const property in Toggle) {
+    if (
+      Toggle.hasOwnProperty(property) &&
+      child.type === Toggle[property]
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
 class Toggle extends React.Component {
   // you can create function components as static properties!
   // for example:
@@ -16,10 +28,12 @@ class Toggle extends React.Component {
   //    be able to accept `on`, `toggle`, and `children` as props.
   //    Note that they will _not_ have access to Toggle instance properties
   //    like `this.state.on` or `this.toggle`.
-  static On = ({ on, children }) => on ? children : null
-  static Off = ({ on, children }) => on ? null : children
-  static Button = ({ on, toggle }) => <Switch on={on} onClick={toggle} />
-  
+  static On = ({on, children}) => (on ? children : null)
+  static Off = ({on, children}) => (on ? null : children)
+  static Button = ({on, toggle}) => (
+    <Switch on={on} onClick={toggle} />
+  )
+
   state = {on: false}
 
   toggle = () =>
@@ -42,10 +56,13 @@ class Toggle extends React.Component {
 
     return React.Children.map(
       this.props.children,
-      child => React.cloneElement(child, {
-        on,
-        toggle: this.toggle
-      })
+      child =>
+        isToggleProperty(child)
+          ? React.cloneElement(child, {
+              on,
+              toggle: this.toggle,
+            })
+          : child,
     )
   }
 }
@@ -64,6 +81,7 @@ function Usage({
       <Toggle.On>The button is on</Toggle.On>
       <Toggle.Off>The button is off</Toggle.Off>
       <Toggle.Button />
+      <span>Hello</span>
     </Toggle>
   )
 }
