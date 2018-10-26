@@ -17,9 +17,9 @@ class Toggle extends React.Component {
   // The `callback` should be where you call `this.props.onToggle(this.state.on)`
   //
   // 💯 Use a state updater function for `newState` to avoid issues with batching
-  state = { on: false }
+  state = {on: false}
 
-  toggle = () => this.setState(({ on }) => ({ on: !on }))
+  toggle = () => this.setState(({on}) => ({on: !on}))
 
   render() {
     // 🐨 here you'll want to return the switch with the `on` and `onClick` props
