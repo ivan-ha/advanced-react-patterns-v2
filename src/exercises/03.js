@@ -44,22 +44,54 @@ import {Switch} from '../switch'
 //   (newlines are ok, like in the above example)
 
 // 🐨 create a ToggleContext with React.createContext here
+const ToggleContext = React.createContext()
+
+const ToggleContextConsumer = props => (
+  <ToggleContext.Consumer {...props}>
+    {context => {
+      if (!context) {
+        throw new Error(
+          'Please do not use Toggle compound component outside Toggle.',
+        )
+      }
+      return props.children(context)
+    }}
+  </ToggleContext.Consumer>
+)
 
 class Toggle extends React.Component {
   // 🐨 each of these compound components will need to be changed to use
   // ToggleContext.Consumer and rather than getting `on` and `toggle`
   // from props, it'll get it from the ToggleContext.Consumer value.
-  static On = ({on, children}) => (on ? children : null)
-  static Off = ({on, children}) => (on ? null : children)
-  static Button = ({on, toggle, ...props}) => (
-    <Switch on={on} onClick={toggle} {...props} />
+  static On = ({children}) => (
+    <ToggleContextConsumer>
+      {({on}) => (on ? children : null)}
+    </ToggleContextConsumer>
   )
-  state = {on: false}
+  static Off = ({children}) => (
+    <ToggleContextConsumer>
+      {({on}) => (on ? null : children)}
+    </ToggleContextConsumer>
+  )
+  static Button = props => (
+    <ToggleContextConsumer>
+      {({on, toggle}) => (
+        <Switch on={on} onClick={toggle} {...props} />
+      )}
+    </ToggleContextConsumer>
+  )
+
   toggle = () =>
     this.setState(
       ({on}) => ({on: !on}),
       () => this.props.onToggle(this.state.on),
     )
+
+  state = {
+    on: false,
+    toggle: this.toggle,
+  }
+
   render() {
     // Because this.props.children is _immediate_ children only, we need
     // to 🐨 remove this map function and render our context provider with
@@ -67,11 +99,10 @@ class Toggle extends React.Component {
     // expose the `on` state and `toggle` method as properties in the context
     // value (the value prop).
 
-    return React.Children.map(this.props.children, child =>
-      React.cloneElement(child, {
-        on: this.state.on,
-        toggle: this.toggle,
-      }),
+    return (
+      <ToggleContext.Provider value={this.state}>
+        {this.props.children}
+      </ToggleContext.Provider>
     )
   }
 }
