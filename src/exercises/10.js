@@ -20,9 +20,14 @@ class Toggle extends React.Component {
   // whether it's coming from this.state or this.props
   // Call it `getState` and have it return on from
   // state if it's not controlled or props if it is.
-  getState = () => ({
-    on: this.isControlled('on') ? this.props.on : this.state.on,
-  })
+  getState = () =>
+    Object.keys(this.state).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: this.props[key] || this.state[key],
+      }),
+      {},
+    )
 
   toggle = () => {
     // 🐨 if the toggle is controlled, then we shouldn't
